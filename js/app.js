@@ -4,7 +4,7 @@ let planets = [];
 const scale = 0.1; // Fator de escala para distâncias e tamanhos
 
 const planetData = {
-    mercury: { distance: 57.9, size: 0.4, texture: 'assets/textures/mercury.jpg', orbitTime: 88 }, // em dias
+    mercury: { distance: 57.9, size: 0.4, texture: 'assets/textures/mercury.jpg', orbitTime: 88 },
     venus: { distance: 108.2, size: 0.95, texture: 'assets/textures/venus.jpg', orbitTime: 225 },
     earth: { distance: 149.6, size: 1, texture: 'assets/textures/earth.jpg', orbitTime: 365 },
     mars: { distance: 227.9, size: 0.8, texture: 'assets/textures/mars.jpg', orbitTime: 687 },
@@ -22,10 +22,14 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Adicionar o fundo
+    // Adicionar o fundo com duas texturas
     const textureLoader = new THREE.TextureLoader();
-    const backgroundTexture = textureLoader.load('assets/textures/space-background.jpg');
-    scene.background = backgroundTexture;
+    const backgroundTexture1 = textureLoader.load('assets/textures/space-background1.jpg'); // Primeira textura
+    const backgroundTexture2 = textureLoader.load('assets/textures/space-background2.jpg'); // Segunda textura
+
+    // Criar o fundo com duas camadas
+    createBackgroundLayer(backgroundTexture1, 0);
+    createBackgroundLayer(backgroundTexture2, 100);
 
     // Sol
     const sunGeometry = new THREE.SphereGeometry(5, 32, 32); // Tamanho do sol
@@ -40,6 +44,9 @@ function init() {
         planets.push(planet);
         scene.add(planet.mesh);
     }
+
+    // Adicionar os anéis de Saturno
+    addSaturnRings();
 
     // Terra e Lua
     const earthOrbit = 14.96; // Terra a 149,6 milhões de km
@@ -79,6 +86,21 @@ function createPlanet(name, data) {
     };
 }
 
+function addSaturnRings() {
+    const saturn = scene.children.find(child => child.position.x === planetData.saturn.distance / 10);
+    if (saturn) {
+        // Criar os anéis de Saturno
+        const ringGeometry = new THREE.TorusGeometry(6, 1, 16, 100); // Tamanho e espessura dos anéis
+        const ringTexture = new THREE.TextureLoader().load('assets/textures/saturn-rings.jpg'); // Textura dos anéis
+        const ringMaterial = new THREE.MeshBasicMaterial({ map: ringTexture, side: THREE.DoubleSide });
+        const rings = new THREE.Mesh(ringGeometry, ringMaterial);
+
+        // Posicionar os anéis ao redor de Saturno
+        rings.rotation.x = Math.PI / 2; // Girar para alinhar com o eixo do planeta
+        saturn.add(rings); // Adicionar os anéis como filho de Saturno
+    }
+}
+
 function addMoon(earthDistance, moonDistance) {
     const earth = scene.children.find(child => child.position.x === earthDistance / 10);
     if (earth) {
@@ -90,6 +112,15 @@ function addMoon(earthDistance, moonDistance) {
         moon.position.x = earthDistance + moonDistance;
         earth.add(moon); // A Lua vai ser filha da Terra, então orbita com ela
     }
+}
+
+// Função para criar camadas de fundo
+function createBackgroundLayer(texture, distance) {
+    const geometry = new THREE.PlaneGeometry(5000, 5000);
+    const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide });
+    const plane = new THREE.Mesh(geometry, material);
+    plane.position.z = distance;
+    scene.add(plane);
 }
 
 // Função de animação contínua
