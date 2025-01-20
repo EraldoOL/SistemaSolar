@@ -1,32 +1,117 @@
 let scene, camera, renderer;
+let planets = [];
+
+const scale = 0.1; // Fator de escala para distâncias e tamanhos
+
+const planetData = {
+    mercury: { distance: 57.9, size: 0.4, texture: 'assets/textures/mercury.jpg', orbitTime: 88 }, // em dias
+    venus: { distance: 108.2, size: 0.95, texture: 'assets/textures/venus.jpg', orbitTime: 225 },
+    earth: { distance: 149.6, size: 1, texture: 'assets/textures/earth.jpg', orbitTime: 365 },
+    mars: { distance: 227.9, size: 0.8, texture: 'assets/textures/mars.jpg', orbitTime: 687 },
+    jupiter: { distance: 778.3, size: 5, texture: 'assets/textures/jupiter.jpg', orbitTime: 4333 },
+    saturn: { distance: 1429, size: 4.5, texture: 'assets/textures/saturn.jpg', orbitTime: 10759 },
+    uranus: { distance: 2877, size: 3.5, texture: 'assets/textures/uranus.jpg', orbitTime: 30687 },
+    neptune: { distance: 4503, size: 3, texture: 'assets/textures/neptune.jpg', orbitTime: 60190 }
+};
 
 function init() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-    renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('solarCanvas') });
+    renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-    // Sol simples
-    const geometry = new THREE.SphereGeometry(5, 32, 32);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-    const sun = new THREE.Mesh(geometry, material);
+    // Adicionar o fundo
+    const textureLoader = new THREE.TextureLoader();
+    const backgroundTexture = textureLoader.load('assets/textures/space-background.jpg');
+    scene.background = backgroundTexture;
+
+    // Sol
+    const sunGeometry = new THREE.SphereGeometry(5, 32, 32); // Tamanho do sol
+    const sunTexture = new THREE.TextureLoader().load('assets/textures/sun.jpg');
+    const sunMaterial = new THREE.MeshBasicMaterial({ map: sunTexture });
+    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
     scene.add(sun);
 
-    camera.position.z = 20;
+    // Criar os planetas
+    for (let planetName in planetData) {
+        let planet = createPlanet(planetName, planetData[planetName]);
+        planets.push(planet);
+        scene.add(planet.mesh);
+    }
 
+    // Terra e Lua
+    const earthOrbit = 14.96; // Terra a 149,6 milhões de km
+    const moonOrbit = 0.38; // Distância Lua da Terra: 0.38 milhões de km
+    addMoon(earthOrbit, moonOrbit);
+
+    // Ajuste a posição da câmera
+    camera.position.z = 30;
+
+    // Controle de órbita
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = false;
+
+    // Animação
     animate();
 }
 
-function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
+function createPlanet(name, data) {
+    const geometry = new THREE.SphereGeometry(data.size, 32, 32);
+    const texture = new THREE.TextureLoader().load(data.texture);
+    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const mesh = new THREE.Mesh(geometry, material);
+
+    // Posicionar o planeta na órbita
+    const distance = data.distance / 10; // Ajuste de escala
+    mesh.position.x = distance;
+
+    // Retornar os dados do planeta
+    return {
+        name,
+        mesh,
+        orbitTime: data.orbitTime, // Tempo orbital em dias
+        angle: 0, // Ângulo atual de órbita
+        distance: distance
+    };
 }
 
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
+function addMoon(earthDistance, moonDistance) {
+    const earth = scene.children.find(child => child.position.x === earthDistance / 10);
+    if (earth) {
+        const moonGeometry = new THREE.SphereGeometry(0.1, 32, 32);
+        const moonMaterial = new THREE.MeshBasicMaterial({ color: 0xAAAAAA });
+        const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+
+        // A Lua orbita a Terra
+        moon.position.x = earthDistance + moonDistance;
+        earth.add(moon); // A Lua vai ser filha da Terra, então orbita com ela
+    }
+}
+
+// Função de animação contínua
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Atualizar a órbita de cada planeta
+    planets.forEach(planet => {
+        planet.angle += (2 * Math.PI) / (planet.orbitTime * 365); // Velocidade proporcional ao tempo real
+        planet.mesh.position.x = planet.distance * Math.cos(planet.angle);
+        planet.mesh.position.z = planet.distance * Math.sin(planet.angle);
+    });
+
+    // Atualizar a órbita da Lua
+    const earth = scene.children.find(child => child.position.x === planetData.earth.distance / 10);
+    if (earth) {
+        earth.children.forEach(moon => {
+            moon.rotation.y += 0.01; // A Lua gira em torno de seu próprio eixo
+        });
+    }
+
+    renderer.render(scene, camera);
+}
 
 init();
