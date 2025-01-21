@@ -63,8 +63,9 @@ function init() {
     const moonOrbit = 0.38; // Distância Lua da Terra: 0.38 milhões de km
     addMoon(earthOrbit, moonOrbit);
 
-    // Ajuste a posição da câmera
-    camera.position.z = 30;
+    // Ajuste a posição da câmera para iniciar perto da Terra
+    camera.position.set(earthOrbit / 10, 0, 30); // Ajuste para iniciar a visualização perto da Terra
+    camera.lookAt(new THREE.Vector3(0, 0, 0)); // Olhar para o centro do Sistema Solar (onde está o Sol)
 
     // Controle de órbita
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -83,7 +84,7 @@ function createPlanet(name, data) {
     const mesh = new THREE.Mesh(geometry, material);
 
     // Posicionar o planeta na órbita
-    const distance = data.distance / 2; // Ajuste de escala
+    const distance = data.distance / 10; // Ajuste de escala
     mesh.position.x = distance;
 
     // Retornar os dados do planeta
