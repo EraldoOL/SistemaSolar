@@ -47,9 +47,9 @@ function init() {
 
     // Posição da câmera ajustada para estar em frente da Terra com zoom
     const earthData = planetData.earth;
-    // Ajustar posição da câmera para estar em frente à Terra
-    camera.position.set(earthData.distance / 1.5, 0, 0); // Ajuste da posição para em frente à Terra
-    camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0)); // Focalizando a Terra
+    const initialDistance = earthData.distance / 1.5; // Ajuste a distância da câmera
+    camera.position.set(initialDistance, 0, 0);  // Coloca a câmera na frente da Terra
+    camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0)); // Olha para a Terra
 
     // Ajuste de controle de órbita
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -122,7 +122,7 @@ function createPlanet(name, data) {
 
 function addMoon() {
     const earthData = planetData.earth;
-    const earthDistance = earthData.distance / 2;
+    const earthDistance = earthData.distance / .5;
 
     const moonGeometry = new THREE.SphereGeometry(0.27, 32, 32);
     const moonTexture = new THREE.TextureLoader().load('assets/textures/moon.jpg');
