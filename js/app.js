@@ -45,18 +45,19 @@ function init() {
     // Carregar posições salvas
     loadPlanetPositions();
 
-    // Posição da câmera ajustada para ficar lateralmente em relação à Terra
+    // Posição da câmera ajustada para estar em frente da Terra com zoom
     const earthData = planetData.earth;
-    camera.position.set(earthData.distance / 2 + 10, 0, 10); // Colocar a câmera mais ao lado da Terra
+    // Ajustar posição da câmera para estar em frente à Terra
+    camera.position.set(earthData.distance / 1.5, 0, 0); // Ajuste da posição para em frente à Terra
     camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0)); // Focalizando a Terra
 
-    // Ajuste da câmera e controles de órbita
+    // Ajuste de controle de órbita
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.enableZoom = true; // Habilitar o zoom
     controls.minDistance = earthData.size * 0.1;  // Permitir aproximar mais dos planetas
-    controls.maxDistance = 10000;  // Limite máximo de zoom (para Netuno)
+    controls.maxDistance = 10000;  // Limite máximo do zoom (para Netuno)
     controls.zoomSpeed = 3; // Ajustar a velocidade do zoom
 
     // Adicionar luz ambiente e luz direcional
@@ -70,6 +71,7 @@ function init() {
     // Iniciar animação
     animate();
 }
+
 
 function createSkybox() {
     const textureLoader = new THREE.TextureLoader();
