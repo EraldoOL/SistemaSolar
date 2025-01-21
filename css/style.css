@@ -9,3 +9,30 @@ canvas {
   width: 0%;
   height: 100%;
 }
+
+
+#planet-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+#planet-panel ul {
+    list-style: none;
+    padding: 0;
+}
+
+#planet-panel li {
+    margin: 10px 0;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#planet-panel li:hover {
+    color: #ff0;
+}
