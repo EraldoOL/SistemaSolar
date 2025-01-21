@@ -14,6 +14,16 @@ const planetData = {
     neptune: { distance: 4503, size: 3, texture: 'assets/textures/neptune.jpg', orbitTime: 60190 }
 };
 
+function createBackgroundLayer(texture, distance) {
+    const geometry = new THREE.SphereGeometry(5000, 32, 32); // Usar uma esfera ao invés de plano
+    const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide });
+    const sphere = new THREE.Mesh(geometry, material);
+
+    // Posicionar a esfera de fundo muito atrás, para não interferir nos planetas
+    sphere.position.set(0, 0, -1000); // Colocar no fundo distante da cena
+    scene.add(sphere);
+}
+
 function init() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -24,15 +34,15 @@ function init() {
 
     // Adicionar o fundo com duas texturas
     const textureLoader = new THREE.TextureLoader();
-    const backgroundTexture1 = textureLoader.load('assets/textures/space-background1.jpg'); // Primeira textura
-    const backgroundTexture2 = textureLoader.load('assets/textures/space-background2.jpg'); // Segunda textura
+    const backgroundTexture1 = textureLoader.load('assets/textures/stars.jpg'); // Primeira textura
+    const backgroundTexture2 = textureLoader.load('assets/textures/stars_milky_way.jpg'); // Segunda textura
 
     // Criar o fundo com duas camadas
     createBackgroundLayer(backgroundTexture1, 0);
     createBackgroundLayer(backgroundTexture2, 100);
 
     // Sol
-    const sunGeometry = new THREE.SphereGeometry(5, 32, 32); // Tamanho do sol
+    const sunGeometry = new THREE.SphereGeometry(15, 32, 32); // Tamanho do sol maior
     const sunTexture = new THREE.TextureLoader().load('assets/textures/sun.jpg');
     const sunMaterial = new THREE.MeshBasicMaterial({ map: sunTexture });
     const sun = new THREE.Mesh(sunGeometry, sunMaterial);
@@ -73,7 +83,7 @@ function createPlanet(name, data) {
     const mesh = new THREE.Mesh(geometry, material);
 
     // Posicionar o planeta na órbita
-    const distance = data.distance / 10; // Ajuste de escala
+    const distance = data.distance / 2; // Ajuste de escala
     mesh.position.x = distance;
 
     // Retornar os dados do planeta
@@ -89,38 +99,44 @@ function createPlanet(name, data) {
 function addSaturnRings() {
     const saturn = scene.children.find(child => child.position.x === planetData.saturn.distance / 10);
     if (saturn) {
-        // Criar os anéis de Saturno
-        const ringGeometry = new THREE.TorusGeometry(6, 1, 16, 100); // Tamanho e espessura dos anéis
-        const ringTexture = new THREE.TextureLoader().load('assets/textures/saturn-rings.jpg'); // Textura dos anéis
-        const ringMaterial = new THREE.MeshBasicMaterial({ map: ringTexture, side: THREE.DoubleSide });
+        // Criar os anéis de Saturno com geometria achatada
+        const ringGeometry = new THREE.TorusGeometry(20, 5, 4, 100); // Raio do disco e espessura
+        const ringTexture = new THREE.TextureLoader().load('assets/textures/saturn_ring_alpha.png'); // Textura dos anéis
+        const ringMaterial = new THREE.MeshBasicMaterial({ 
+            map: ringTexture, 
+            side: THREE.DoubleSide, 
+            opacity: 0.5, // Ajuste da opacidade
+            transparent: false // Tornar o material transparente
+        });
         const rings = new THREE.Mesh(ringGeometry, ringMaterial);
 
-        // Posicionar os anéis ao redor de Saturno
-        rings.rotation.x = Math.PI / 2; // Girar para alinhar com o eixo do planeta
-        saturn.add(rings); // Adicionar os anéis como filho de Saturno
+        // Achatar os anéis no eixo Y
+        rings.scale.set(0.4, 0.4, 0); // Achatar os anéis no eixo Y
+
+        // Posicionar os anéis em relação a Saturno
+        rings.position.set(0, 0, 0); // Colocar no centro de Saturno
+        saturn.add(rings); // Adicionar os anéis como filho de Saturno, para que circulem com ele
+
+        // Ajustar os anéis para garantir que fiquem alinhados com a órbita de Saturno
+        rings.rotation.x = Math.PI / 2; // Girar os anéis no eixo X para que fiquem planos
     }
 }
 
-function addMoon(earthDistance, moonDistance) {
-    const earth = scene.children.find(child => child.position.x === earthDistance / 10);
+function addMoon(earthOrbit, moonOrbit) {
+    const earth = scene.children.find(child => child.position.x === earthOrbit / 10);
     if (earth) {
         const moonGeometry = new THREE.SphereGeometry(0.1, 32, 32);
-        const moonMaterial = new THREE.MeshBasicMaterial({ color: 0xAAAAAA });
+        const moonTexture = new THREE.TextureLoader().load('assets/textures/moon.jpg');
+        const moonMaterial = new THREE.MeshBasicMaterial({ map: moonTexture });
         const moon = new THREE.Mesh(moonGeometry, moonMaterial);
 
         // A Lua orbita a Terra
-        moon.position.x = earthDistance + moonDistance;
+        moon.position.x = earthOrbit + moonOrbit; // A Lua começa a orbitar a Terra
         earth.add(moon); // A Lua vai ser filha da Terra, então orbita com ela
-    }
-}
 
-// Função para criar camadas de fundo
-function createBackgroundLayer(texture, distance) {
-    const geometry = new THREE.PlaneGeometry(5000, 5000);
-    const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide });
-    const plane = new THREE.Mesh(geometry, material);
-    plane.position.z = distance;
-    scene.add(plane);
+        // Adicionar a Lua ao planeta
+        planets.push({ name: 'moon', mesh: moon });
+    }
 }
 
 // Função de animação contínua
@@ -138,7 +154,9 @@ function animate() {
     const earth = scene.children.find(child => child.position.x === planetData.earth.distance / 10);
     if (earth) {
         earth.children.forEach(moon => {
-            moon.rotation.y += 0.01; // A Lua gira em torno de seu próprio eixo
+            moon.angle += (2 * Math.PI) / 27; // Lua orbita a Terra em 27 dias
+            moon.position.x = earth.position.x + (planetData.earth.distance / 10 + 0.38) * Math.cos(moon.angle);
+            moon.position.z = earth.position.z + (planetData.earth.distance / 10 + 0.38) * Math.sin(moon.angle);
         });
     }
 
