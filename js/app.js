@@ -45,34 +45,60 @@ function init() {
     // Carregar posições salvas
     loadPlanetPositions();
 
-    // Ajustar posição inicial da câmera para a Terra
+    // Posição da câmera ajustada para ficar lateralmente em relação à Terra
     const earthData = planetData.earth;
-    camera.position.set(earthData.distance / 2 + 5, 5, 20);
-    camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0));
+    camera.position.set(earthData.distance / 2 + 10, 0, 10); // Colocar a câmera mais ao lado da Terra
+    camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0)); // Focalizando a Terra
 
-    // Controle de órbita
+    // Ajuste da câmera e controles de órbita
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
+    controls.enableZoom = true; // Habilitar o zoom
+    controls.minDistance = earthData.size * 0.1;  // Permitir aproximar mais dos planetas
+    controls.maxDistance = 10000;  // Limite máximo de zoom (para Netuno)
+    controls.zoomSpeed = 3; // Ajustar a velocidade do zoom
+
+    // Adicionar luz ambiente e luz direcional
+    const light = new THREE.AmbientLight(0x404040, 1); // Luz ambiente
+    scene.add(light);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Luz direcional
+    directionalLight.position.set(10, 10, 10).normalize();
+    scene.add(directionalLight);
 
     // Iniciar animação
     animate();
 }
 
 function createSkybox() {
-    const loader = new THREE.CubeTextureLoader();
-    const skyboxTextures = [
-        'assets/skybox/px.jpg', // Positive X
-        'assets/skybox/nx.jpg', // Negative X
-        'assets/skybox/py.jpg', // Positive Y
-        'assets/skybox/ny.jpg', // Negative Y
-        'assets/skybox/pz.jpg', // Positive Z
-        'assets/skybox/nz.jpg'  // Negative Z
-    ];
+    const textureLoader = new THREE.TextureLoader();
 
-    const skybox = loader.load(skyboxTextures);
-    scene.background = skybox;
+    // Primeira camada do fundo
+    const backgroundTexture1 = textureLoader.load('assets/textures/stars_milky_way.jpg', (texture) => {
+        const backgroundSphere1 = new THREE.Mesh(
+            new THREE.SphereGeometry(10000, 64, 64), // Esfera gigantesca para o fundo
+            new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide })
+        );
+        scene.add(backgroundSphere1);
+    });
+
+    // Segunda camada do fundo (opcional, para maior profundidade)
+    const backgroundTexture2 = textureLoader.load('assets/textures/stars.jpg', (texture) => {
+        const backgroundSphere2 = new THREE.Mesh(
+            new THREE.SphereGeometry(20000, 64, 64), // Outra esfera ainda maior
+            new THREE.MeshBasicMaterial({
+                map: texture,
+                side: THREE.BackSide,
+                opacity: 0.5, // Transparência opcional
+                transparent: true,
+            })
+        );
+        scene.add(backgroundSphere2);
+    });
 }
+
+
 
 function createPlanet(name, data) {
     const geometry = new THREE.SphereGeometry(data.size, 32, 32);
