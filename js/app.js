@@ -1,6 +1,7 @@
-let scene, camera, renderer;
-let planets = [];
+let scene, camera, renderer, controls;
+let planets = []; // Declare planetas uma vez globalmente
 let moonAngle = 0;
+let isTeleporting = false; // Variável global para controlar o teleporte
 
 const scale = 0.1; // Escala para distâncias e tamanhos
 
@@ -52,7 +53,7 @@ function init() {
     camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0)); // Olha para a Terra
 
     // Ajuste de controle de órbita
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.enableZoom = true; // Habilitar o zoom
@@ -71,7 +72,6 @@ function init() {
     // Iniciar animação
     animate();
 }
-
 
 function createSkybox() {
     const textureLoader = new THREE.TextureLoader();
@@ -99,8 +99,6 @@ function createSkybox() {
         scene.add(backgroundSphere2);
     });
 }
-
-
 
 function createPlanet(name, data) {
     const geometry = new THREE.SphereGeometry(data.size, 32, 32);
@@ -160,12 +158,47 @@ function loadPlanetPositions() {
     }
 }
 
+function teleportToPlanet(planetName) {
+    if (isTeleporting) return; // Impede teleportação enquanto já está teletransportando
+
+    isTeleporting = true; // Ativa o estado de teleporte
+
+    const planet = planets.find(p => p.name === planetName);
+    if (planet) {
+        // Calcular a nova posição da câmera
+        const distanceFactor = 2; // Ajuste a distância entre o planeta e a câmera
+        camera.position.set(planet.distance * distanceFactor, 0, 0); // Posiciona a câmera
+
+        // A câmera deve olhar para o centro (o Sol)
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+        // Aumenta o zoom para ter uma visão mais próxima do planeta
+        controls.maxDistance = planet.distance * distanceFactor;  // Limita o zoom máximo
+        controls.minDistance = planet.size * 0.5;  // Limita o zoom mínimo
+        controls.update();
+
+        // Ajusta a distância para a Terra, se for o caso
+        if (planetName === 'earth') {
+            camera.position.set(planet.distance * 1.5, 0, 0); // Distância ajustada para a Terra
+        }
+
+        // Espera um segundo e redefine o estado de teleporte
+        setTimeout(() => {
+            isTeleporting = false; // Reseta o estado de teleporte
+        }, 1000);
+    }
+}
+
 function animate() {
     requestAnimationFrame(animate);
 
+    // Verifica se a câmera está teleportando, e se sim, impede que os planetas girem
+    if (isTeleporting) return;
+
+    // Atualiza a posição dos planetas em órbita
     planets.forEach(planet => {
         if (planet.name !== 'moon') {
-            planet.angle += (2 * Math.PI) / (planet.orbitTime * 100); // Escala reduzida para simulação realista
+            planet.angle += (2 * Math.PI) / (planet.orbitTime * 100); // Controle da velocidade de órbita
             planet.mesh.position.x = planet.distance * Math.cos(planet.angle);
             planet.mesh.position.z = planet.distance * Math.sin(planet.angle);
         } else {
@@ -178,7 +211,6 @@ function animate() {
         }
     });
 
-    savePlanetPositions();
     renderer.render(scene, camera);
 }
 
