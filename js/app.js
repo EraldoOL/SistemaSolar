@@ -167,14 +167,15 @@ function teleportToPlanet(planetName) {
     if (planet) {
         // Calcular a nova posição da câmera
         const distanceFactor = 2; // Ajuste a distância entre o planeta e a câmera
-        camera.position.set(planet.distance * distanceFactor, 0, 0); // Posiciona a câmera
+        const newPosition = new THREE.Vector3(planet.distance * distanceFactor, 0, 0);
+        camera.position.copy(newPosition); // Posiciona a câmera
 
         // A câmera deve olhar para o centro (o Sol)
         camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-        // Aumenta o zoom para ter uma visão mais próxima do planeta
-        controls.maxDistance = planet.distance * distanceFactor;  // Limita o zoom máximo
-        controls.minDistance = planet.size * 0.5;  // Limita o zoom mínimo
+        // Ajusta a distância mínima e máxima do zoom
+        controls.maxDistance = planet.distance * distanceFactor;
+        controls.minDistance = planet.size * 0.5;
         controls.update();
 
         // Ajusta a distância para a Terra, se for o caso
