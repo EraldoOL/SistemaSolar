@@ -1,9 +1,9 @@
 let scene, camera, renderer, controls;
-let planets = [];
+let planets = []; // Lista de planetas
 let moonAngle = 0;
-let isTeleporting = false;
+let isTeleporting = false; // Variável para controlar o teleporte
 
-const scale = 0.1;
+const scale = 0.1; // Escala para distâncias e tamanhos
 
 const planetData = {
     mercury: { distance: 57.9, size: 0.4, texture: 'assets/textures/mercury.jpg', orbitTime: 88 },
@@ -43,12 +43,9 @@ function init() {
     // Adicionar Lua orbitando a Terra
     addMoon();
 
-    // Carregar posições salvas
-    loadPlanetPositions();
-
     // Configurar câmera inicial
     const earthData = planetData.earth;
-    camera.position.set(earthData.distance / 1.5, 0, 0);
+    camera.position.set(earthData.distance / 2, 20, 50);
     camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0));
 
     // Ajustar controles de órbita
@@ -56,16 +53,14 @@ function init() {
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.enableZoom = true;
-    controls.minDistance = earthData.size * 0.1;
-    controls.maxDistance = 10000;
     controls.zoomSpeed = 3;
 
     // Adicionar luzes
-    const light = new THREE.AmbientLight(0x404040, 1);
-    scene.add(light);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+    scene.add(ambientLight);
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(10, 10, 10).normalize();
+    directionalLight.position.set(50, 50, 50);
     scene.add(directionalLight);
 
     // Iniciar animação
@@ -74,7 +69,7 @@ function init() {
 
 function createSkybox() {
     const textureLoader = new THREE.TextureLoader();
-    const backgroundTexture = textureLoader.load('assets/textures/stars_milky_way.jpg');
+    const backgroundTexture = textureLoader.load('assets/textures/stars.jpg');
     const backgroundSphere = new THREE.Mesh(
         new THREE.SphereGeometry(10000, 64, 64),
         new THREE.MeshBasicMaterial({ map: backgroundTexture, side: THREE.BackSide })
@@ -121,32 +116,28 @@ function addMoon() {
     });
 }
 
+
+
 function savePlanetPositions() {
     const positions = planets.map(planet => ({
         name: planet.name,
-        position: {
-            x: planet.mesh.position.x,
-            y: planet.mesh.position.y,
-            z: planet.mesh.position.z
-        },
         angle: planet.angle
     }));
     localStorage.setItem('planetPositions', JSON.stringify(positions));
 }
 
 function loadPlanetPositions() {
-    const savedPositions = JSON.parse(localStorage.getItem('planetPositions'));
-    if (savedPositions) {
-        savedPositions.forEach(savedPlanet => {
+    const savedData = localStorage.getItem('planetPositions');
+    if (savedData) {
+        const positions = JSON.parse(savedData);
+        positions.forEach(savedPlanet => {
             const planet = planets.find(p => p.name === savedPlanet.name);
-            if (planet && savedPlanet.position) {
-                const { x, y, z } = savedPlanet.position;
-                planet.mesh.position.set(x, y, z);
-                planet.angle = savedPlanet.angle || 0;
-            }
+            if (planet) planet.angle = savedPlanet.angle;
         });
     }
 }
+
+
 
 function teleportToPlanet(planetName) {
     if (isTeleporting) return;
@@ -154,42 +145,45 @@ function teleportToPlanet(planetName) {
     isTeleporting = true;
     const planet = planets.find(p => p.name === planetName);
     if (planet) {
-        const distanceFactor = 2;
-        const newPosition = new THREE.Vector3(planet.mesh.position.x * distanceFactor, 0, 0);
-        camera.position.copy(newPosition);
+        const targetPosition = new THREE.Vector3(
+            planet.mesh.position.x + 10,
+            planet.mesh.position.y + 10,
+            planet.mesh.position.z + 10
+        );
+        camera.position.copy(targetPosition);
         camera.lookAt(planet.mesh.position);
-        controls.maxDistance = planet.distance * distanceFactor;
-        controls.minDistance = planet.size * 0.5;
         controls.update();
 
         setTimeout(() => {
             isTeleporting = false;
-        }, 1000);
+        }, 1500); // Tempo de teleporte
     }
 }
 
 function animate() {
     requestAnimationFrame(animate);
 
-    if (!isTeleporting) {
-        planets.forEach(planet => {
-            if (planet.name !== 'moon') {
-                planet.angle += (2 * Math.PI) / (planet.orbitTime * 100);
-                planet.mesh.position.x = planet.distance * Math.cos(planet.angle);
-                planet.mesh.position.z = planet.distance * Math.sin(planet.angle);
-            } else {
-                const earth = planets.find(p => p.name === 'earth');
-                if (earth) {
-                    moonAngle += (2 * Math.PI) / (planet.orbitTime * 100);
-                    planet.mesh.position.x = earth.mesh.position.x + planet.distance * Math.cos(moonAngle);
-                    planet.mesh.position.z = earth.mesh.position.z + planet.distance * Math.sin(moonAngle);
-                }
+    planets.forEach(planet => {
+        if (planet.name !== 'moon') {
+            planet.angle += (2 * Math.PI) / (planet.orbitTime * 100);
+            planet.mesh.position.x = planet.distance * Math.cos(planet.angle);
+            planet.mesh.position.z = planet.distance * Math.sin(planet.angle);
+        } else {
+            const earth = planets.find(p => p.name === 'earth');
+            if (earth) {
+                moonAngle += (2 * Math.PI) / (planet.orbitTime * 100);
+                planet.mesh.position.x = earth.mesh.position.x + planet.distance * Math.cos(moonAngle);
+                planet.mesh.position.z = earth.mesh.position.z + planet.distance * Math.sin(moonAngle);
             }
-        });
-    }
+        }
+    });
 
-    savePlanetPositions(); // Salvar posições em cada frame
     renderer.render(scene, camera);
 }
 
 init();
+
+
+
+
+
