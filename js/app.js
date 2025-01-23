@@ -46,28 +46,27 @@ function init() {
     // Carregar posições salvas
     loadPlanetPositions();
 
-    // Posição da câmera ajustada para estar em frente da Terra com zoom
+    // Configurar câmera inicial
     const earthData = planetData.earth;
-    const initialDistance = earthData.distance / 1.5; // Ajuste a distância da câmera
-    camera.position.set(initialDistance, 0, 0);  // Coloca a câmera na frente da Terra
-    camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0)); // Olha para a Terra
+    camera.position.set(earthData.distance / 1.5, 0, 0);
+    camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0));
 
-    // Ajuste de controle de órbita
+    // Ajustar controles de órbita
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
-    controls.enableZoom = true; // Habilitar o zoom
-    controls.minDistance = earthData.size * 0.1;  // Permitir aproximar mais dos planetas
-    controls.maxDistance = 10000;  // Limite máximo do zoom (para Netuno)
-    controls.zoomSpeed = 3; // Ajustar a velocidade do zoom
+    controls.enableZoom = true;
+    controls.minDistance = earthData.size * 0.1;
+    controls.maxDistance = 10000;
+    controls.zoomSpeed = 3;
 
-    // Adicionar luz ambiente e luz direcional
-    const light = new THREE.AmbientLight(0x404040, 1); // Luz ambiente
-scene.add(light);
+    // Adicionar luzes
+    const light = new THREE.AmbientLight(0x404040, 1);
+    scene.add(light);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Luz direcional
-directionalLight.position.set(10, 10, 10).normalize();
-scene.add(directionalLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(10, 10, 10).normalize();
+    scene.add(directionalLight);
 
     // Iniciar animação
     animate();
@@ -75,24 +74,21 @@ scene.add(directionalLight);
 
 function createSkybox() {
     const textureLoader = new THREE.TextureLoader();
-
-    // Primeira camada do fundo
     const backgroundTexture1 = textureLoader.load('assets/textures/stars_milky_way.jpg', (texture) => {
         const backgroundSphere1 = new THREE.Mesh(
-            new THREE.SphereGeometry(10000, 64, 64), // Esfera gigantesca para o fundo
+            new THREE.SphereGeometry(10000, 64, 64),
             new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide })
         );
         scene.add(backgroundSphere1);
     });
 
-    // Segunda camada do fundo (opcional, para maior profundidade)
     const backgroundTexture2 = textureLoader.load('assets/textures/stars.jpg', (texture) => {
         const backgroundSphere2 = new THREE.Mesh(
-            new THREE.SphereGeometry(20000, 64, 64), // Outra esfera ainda maior
+            new THREE.SphereGeometry(20000, 64, 64),
             new THREE.MeshBasicMaterial({
                 map: texture,
                 side: THREE.BackSide,
-                opacity: 0.5, // Transparência opcional
+                opacity: 0.5,
                 transparent: true,
             })
         );
@@ -120,7 +116,7 @@ function createPlanet(name, data) {
 
 function addMoon() {
     const earthData = planetData.earth;
-    const earthDistance = earthData.distance / .5;
+    const earthDistance = earthData.distance / 2;
 
     const moonGeometry = new THREE.SphereGeometry(0.27, 32, 32);
     const moonTexture = new THREE.TextureLoader().load('assets/textures/moon.jpg');
@@ -159,67 +155,44 @@ function loadPlanetPositions() {
 }
 
 function teleportToPlanet(planetName) {
-    if (isTeleporting) return; // Impede múltiplos teleportes simultâneos
+    if (isTeleporting) return;
 
+    isTeleporting = true;
     const planet = planets.find(p => p.name === planetName);
-    if (!planet) return; // Sai se o planeta não for encontrado
+    if (planet) {
+        const distanceFactor = 2;
+        const newPosition = new THREE.Vector3(planet.distance * distanceFactor, 0, 0);
+        camera.position.copy(newPosition);
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        controls.maxDistance = planet.distance * distanceFactor;
+        controls.minDistance = planet.size * 0.5;
+        controls.update();
 
-    isTeleporting = true; // Ativa o estado de teleporte
-
-    // Calcula a posição desejada da câmera em relação ao planeta
-    const distanceFactor = 2; // Define a distância da câmera ao planeta
-    const newPosition = new THREE.Vector3(
-        planet.mesh.position.x + planet.size * distanceFactor,
-        planet.mesh.position.y + planet.size * distanceFactor,
-        planet.mesh.position.z + planet.size * distanceFactor
-    );
-
-    // Anima a transição para a nova posição (opcional)
-    const duration = 1; // Duração da animação em segundos
-    const startPosition = camera.position.clone();
-    const startTime = performance.now();
-
-    function animateTeleport() {
-        const elapsed = (performance.now() - startTime) / 1000; // Tempo decorrido em segundos
-        const t = Math.min(elapsed / duration, 1); // Normaliza o tempo para [0, 1]
-
-        // Interpola entre a posição inicial e a final
-        camera.position.lerpVectors(startPosition, newPosition, t);
-
-        // Mantém a câmera olhando para o planeta
-        camera.lookAt(planet.mesh.position);
-
-        if (t < 1) {
-            requestAnimationFrame(animateTeleport);
-        } else {
-            isTeleporting = false; // Reseta o estado de teleporte ao finalizar
-        }
+        setTimeout(() => {
+            isTeleporting = false;
+        }, 1000);
     }
-
-    animateTeleport();
 }
 
 function animate() {
     requestAnimationFrame(animate);
 
-    // Verifica se a câmera está teleportando, e se sim, impede que os planetas girem
-    if (isTeleporting) return;
-
-    // Atualiza a posição dos planetas em órbita
-    planets.forEach(planet => {
-        if (planet.name !== 'moon') {
-            planet.angle += (2 * Math.PI) / (planet.orbitTime * 100); // Controle da velocidade de órbita
-            planet.mesh.position.x = planet.distance * Math.cos(planet.angle);
-            planet.mesh.position.z = planet.distance * Math.sin(planet.angle);
-        } else {
-            const earth = planets.find(p => p.name === 'earth');
-            if (earth) {
-                moonAngle += (2 * Math.PI) / (planet.orbitTime * 100);
-                planet.mesh.position.x = earth.mesh.position.x + planet.distance * Math.cos(moonAngle);
-                planet.mesh.position.z = earth.mesh.position.z + planet.distance * Math.sin(moonAngle);
+    if (!isTeleporting) {
+        planets.forEach(planet => {
+            if (planet.name !== 'moon') {
+                planet.angle += (2 * Math.PI) / (planet.orbitTime * 100);
+                planet.mesh.position.x = planet.distance * Math.cos(planet.angle);
+                planet.mesh.position.z = planet.distance * Math.sin(planet.angle);
+            } else {
+                const earth = planets.find(p => p.name === 'earth');
+                if (earth) {
+                    moonAngle += (2 * Math.PI) / (planet.orbitTime * 100);
+                    planet.mesh.position.x = earth.mesh.position.x + planet.distance * Math.cos(moonAngle);
+                    planet.mesh.position.z = earth.mesh.position.z + planet.distance * Math.sin(moonAngle);
+                }
             }
-        }
-    });
+        });
+    }
 
     renderer.render(scene, camera);
 }
