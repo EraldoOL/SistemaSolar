@@ -155,11 +155,13 @@ function teleportToPlanet(planetName) {
     const planet = planets.find(p => p.name === planetName);
     if (planet) {
         const distanceFactor = 2;
-        const newPosition = new THREE.Vector3(planet.mesh.position.x * distanceFactor, 0, 0);
+        const newPosition = new THREE.Vector3(planet.mesh.position.x * distanceFactor, 0, planet.mesh.position.z * distanceFactor);
 
         // Teleportar a câmera para o planeta
         camera.position.copy(newPosition);
-        camera.lookAt(planet.mesh.position);
+
+        // Olhar para o Sol
+        camera.lookAt(new THREE.Vector3(0, 0, 0));  // O Sol está na posição (0,0,0)
 
         // Ajustar os controles de órbita
         controls.maxDistance = planet.distance * distanceFactor;
