@@ -134,12 +134,12 @@ function loadPlanetPositions() {
     if (savedPositions) {
         savedPositions.forEach(savedPlanet => {
             const planet = planets.find(p => p.name === savedPlanet.name);
-            if (planet) {
-                planet.mesh.position.set(
-                    savedPlanet.position.x,
-                    savedPlanet.position.y,
-                    savedPlanet.position.z
-                );
+            if (planet && savedPlanet.position) {
+                // Verificar se 'position' tem os valores necessários
+                const { x, y, z } = savedPlanet.position;
+                if (x !== undefined && y !== undefined && z !== undefined) {
+                    planet.mesh.position.set(x, y, z);
+                }
             }
         });
     }
