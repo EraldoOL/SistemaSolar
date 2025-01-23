@@ -63,11 +63,11 @@ function init() {
 
     // Adicionar luz ambiente e luz direcional
     const light = new THREE.AmbientLight(0x404040, 1); // Luz ambiente
-    scene.add(light);
+scene.add(light);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Luz direcional
-    directionalLight.position.set(10, 10, 10).normalize();
-    scene.add(directionalLight);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Luz direcional
+directionalLight.position.set(10, 10, 10).normalize();
+scene.add(directionalLight);
 
     // Iniciar animação
     animate();
