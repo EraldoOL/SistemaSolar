@@ -43,6 +43,9 @@ function init() {
     // Adicionar Lua orbitando a Terra
     addMoon();
 
+    // Carregar posições salvas
+    loadPlanetPositions();
+
     // Configurar câmera inicial
     const earthData = planetData.earth;
     camera.position.set(earthData.distance / 2, 20, 50);
@@ -116,24 +119,29 @@ function addMoon() {
     });
 }
 
-function teleportToPlanet(planetName) {
-    if (isTeleporting) return;
+// Salvar posições dos planetas no localStorage
+function savePlanetPositions() {
+    const planetPositions = planets.map(planet => ({
+        name: planet.name,
+        position: planet.mesh.position
+    }));
+    localStorage.setItem('planetPositions', JSON.stringify(planetPositions));
+}
 
-    isTeleporting = true;
-    const planet = planets.find(p => p.name === planetName);
-    if (planet) {
-        const targetPosition = new THREE.Vector3(
-            planet.mesh.position.x + 10,
-            planet.mesh.position.y + 10,
-            planet.mesh.position.z + 10
-        );
-        camera.position.copy(targetPosition);
-        camera.lookAt(planet.mesh.position);
-        controls.update();
-
-        setTimeout(() => {
-            isTeleporting = false;
-        }, 1500); // Tempo de teleporte
+// Carregar posições dos planetas do localStorage
+function loadPlanetPositions() {
+    const savedPositions = JSON.parse(localStorage.getItem('planetPositions'));
+    if (savedPositions) {
+        savedPositions.forEach(savedPlanet => {
+            const planet = planets.find(p => p.name === savedPlanet.name);
+            if (planet) {
+                planet.mesh.position.set(
+                    savedPlanet.position.x,
+                    savedPlanet.position.y,
+                    savedPlanet.position.z
+                );
+            }
+        });
     }
 }
 
@@ -156,6 +164,9 @@ function animate() {
     });
 
     renderer.render(scene, camera);
+
+    // Salvar posições em cada frame
+    savePlanetPositions();
 }
 
 init();
