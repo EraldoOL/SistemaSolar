@@ -156,15 +156,20 @@ function teleportToPlanet(planetName) {
     if (planet) {
         const distanceFactor = 2;
         const newPosition = new THREE.Vector3(planet.mesh.position.x * distanceFactor, 0, 0);
+
+        // Teleportar a câmera para o planeta
         camera.position.copy(newPosition);
         camera.lookAt(planet.mesh.position);
+
+        // Ajustar os controles de órbita
         controls.maxDistance = planet.distance * distanceFactor;
         controls.minDistance = planet.size * 0.5;
         controls.update();
 
+        // Atualizar a cena após um pequeno atraso
         setTimeout(() => {
             isTeleporting = false;
-        }, 1000);
+        }, 1000); // Tempo de transição maior para garantir que a cena não fique preta
     }
 }
 
