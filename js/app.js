@@ -159,35 +159,44 @@ function loadPlanetPositions() {
 }
 
 function teleportToPlanet(planetName) {
-    if (isTeleporting) return; // Impede teleportação enquanto já está teletransportando
+    if (isTeleporting) return; // Impede múltiplos teleportes simultâneos
+
+    const planet = planets.find(p => p.name === planetName);
+    if (!planet) return; // Sai se o planeta não for encontrado
 
     isTeleporting = true; // Ativa o estado de teleporte
 
-    const planet = planets.find(p => p.name === planetName);
-    if (planet) {
-        // Calcular a nova posição da câmera
-        const distanceFactor = 2; // Ajuste a distância entre o planeta e a câmera
-        const newPosition = new THREE.Vector3(planet.distance * distanceFactor, 0, 0);
-        camera.position.copy(newPosition); // Posiciona a câmera
+    // Calcula a posição desejada da câmera em relação ao planeta
+    const distanceFactor = 2; // Define a distância da câmera ao planeta
+    const newPosition = new THREE.Vector3(
+        planet.mesh.position.x + planet.size * distanceFactor,
+        planet.mesh.position.y + planet.size * distanceFactor,
+        planet.mesh.position.z + planet.size * distanceFactor
+    );
 
-        // A câmera deve olhar para o centro (o Sol)
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
+    // Anima a transição para a nova posição (opcional)
+    const duration = 1; // Duração da animação em segundos
+    const startPosition = camera.position.clone();
+    const startTime = performance.now();
 
-        // Ajusta a distância mínima e máxima do zoom
-        controls.maxDistance = planet.distance * distanceFactor;
-        controls.minDistance = planet.size * 0.5;
-        controls.update();
+    function animateTeleport() {
+        const elapsed = (performance.now() - startTime) / 1000; // Tempo decorrido em segundos
+        const t = Math.min(elapsed / duration, 1); // Normaliza o tempo para [0, 1]
 
-        // Ajusta a distância para a Terra, se for o caso
-        if (planetName === 'earth') {
-            camera.position.set(planet.distance * 1.5, 0, 0); // Distância ajustada para a Terra
+        // Interpola entre a posição inicial e a final
+        camera.position.lerpVectors(startPosition, newPosition, t);
+
+        // Mantém a câmera olhando para o planeta
+        camera.lookAt(planet.mesh.position);
+
+        if (t < 1) {
+            requestAnimationFrame(animateTeleport);
+        } else {
+            isTeleporting = false; // Reseta o estado de teleporte ao finalizar
         }
-
-        // Espera um segundo e redefine o estado de teleporte
-        setTimeout(() => {
-            isTeleporting = false; // Reseta o estado de teleporte
-        }, 1000);
     }
+
+    animateTeleport();
 }
 
 function animate() {
