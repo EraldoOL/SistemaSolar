@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@tweenjs/tween.js": "^25.0.0"
+  }
+}
