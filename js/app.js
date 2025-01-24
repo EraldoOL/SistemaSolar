@@ -100,40 +100,38 @@ function createPlanet(name, data) {
     };
 }
 
-// Função para criar os anéis de Saturno
-function createSaturnRings() {
-    const saturnRingGeometry = new THREE.RingGeometry(6, 10, 100); // Raio interno 6, raio externo 10, e 100 segmentos
-    const saturnRingMaterial = new THREE.MeshBasicMaterial({
-        map: new THREE.TextureLoader().load('assets/textures/saturn_ring_alpha.png'), // Carregando a textura correta
-        side: THREE.DoubleSide, // Tornando ambos os lados visíveis
-        transparent: true, // Garantindo que a transparência da textura seja aplicada
-        alphaTest: 0.5, // Definindo o limiar de transparência
+function createSaturnRings(planet) {
+    // Geometria do anel (tamanho ajustável)
+    const ringGeometry = new THREE.RingGeometry(12, 18, 64); // Raio interno e externo
+    const ringMaterial = new THREE.MeshBasicMaterial({
+        color: 0xcccccc, // Cor do anel
+        side: THREE.DoubleSide, // Renderizar ambos os lados
+        transparent: true,
+        opacity: 0.8 // Para deixar um pouco translúcido
     });
-    
-    const saturnRings = new THREE.Mesh(saturnRingGeometry, saturnRingMaterial);
-    saturnRings.rotation.x = Math.PI / 2; // Coloca o anel na posição correta (horizontal)
-    saturnRings.position.set(0, 0, 0); // Posiciona os anéis no centro de Saturno
 
-    return saturnRings; // Retorna o objeto para ser adicionado à cena
+    const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+
+    // Rotação para alinhar com o planeta
+    ringMesh.rotation.x = Math.PI / 2; // Deitar o anel no eixo X
+    ringMesh.position.set(planet.position.x, planet.position.y, planet.position.z);
+
+    return ringMesh;
 }
 
-// Função para criar o planeta Saturno
+// Criar Saturno e seus anéis
 function createSaturn() {
-    const saturnGeometry = new THREE.SphereGeometry(4.5, 32, 32); // Criando a esfera de Saturno
-    const saturnTexture = new THREE.TextureLoader().load('assets/textures/saturn.jpg'); // Textura de Saturno
-    const saturnMaterial = new THREE.MeshBasicMaterial({ map: saturnTexture });
-    const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
-    
-    // Criar os anéis de Saturno
-    const saturnRings = createSaturnRings();
-    
-    // Posicionar Saturno
-    saturn.position.set(1429, 0, 0); // Ajuste a distância de Saturno conforme necessário
+    const saturnGeometry = new THREE.SphereGeometry(10, 32, 32);
+    const saturnMaterial = new THREE.MeshPhongMaterial({ color: 0xd3b58d });
+    const saturnMesh = new THREE.Mesh(saturnGeometry, saturnMaterial);
 
-    scene.add(saturn); // Adiciona Saturno à cena
-    scene.add(saturnRings); // Adiciona os anéis de Saturno à cena
+    // Posição de Saturno no espaço
+    saturnMesh.position.set(150, 0, 160);
 
-    return saturn;
+    // Criar e adicionar os anéis de Saturno
+    const saturnRings = createSaturnRings(saturnMesh);
+    scene.add(saturnMesh);
+    scene.add(saturnRings);
 }
 
 function addMoon() {
@@ -184,31 +182,48 @@ function loadPlanetPositions() {
     }
 }
 
-function teleportToPlanet(planetName) {
-    if (isTeleporting) return;
+function teleportToPlanet(planetId) {
+    const planet = document.getElementById(planetId);
 
-    isTeleporting = true;
-    const planet = planets.find(p => p.name === planetName);
-    if (planet) {
-        // Ajuste da posição da câmera
-        const distanceFactor = 3; // Distância maior para o planeta
-        const newPosition = new THREE.Vector3(planet.mesh.position.x * distanceFactor, 0, planet.mesh.position.z * distanceFactor);
-
-        // Teleportar a câmera para o planeta
-        camera.position.copy(newPosition);
-
-        // Olhar para o Sol
-        camera.lookAt(new THREE.Vector3(0, 0, 0)); // O Sol está na posição (0,0,0)
-
-        // Atualizar os controles de órbita
-        controls.target.set(0, 0, 0);  // Focar no Sol
-        controls.update();
-
-        // Atualizar a cena após o teleporte
-        setTimeout(() => {
-            isTeleporting = false;
-        }, 1000); // Aguarda um tempo para evitar o teleporte simultâneo
+    if (!planet) {
+        console.error(`Planeta ${planetId} não encontrado!`);
+        return;
     }
+
+    // Posição do planeta no espaço 3D (exemplo fictício)
+    const planetPosition = {
+        mercury: { x: 10, y: 0, z: 20 },
+        venus: { x: 30, y: 0, z: 40 },
+        earth: { x: 50, y: 0, z: 60 },
+        mars: { x: 70, y: 0, z: 80 },
+        jupiter: { x: 100, y: 0, z: 120 },
+        saturn: { x: 150, y: 0, z: 160 },
+        uranus: { x: 200, y: 0, z: 220 },
+        neptune: { x: 250, y: 0, z: 260 }
+    }[planetId];
+
+    if (!planetPosition) {
+        console.error(`Posição do planeta ${planetId} não definida!`);
+        return;
+    }
+
+    // Configuração da câmera
+    const cameraPosition = {
+        x: planetPosition.x,
+        y: planetPosition.y + 10, // Um pouco acima do plano do planeta
+        z: planetPosition.z - 30 // Mais próximo do planeta
+    };
+
+    // Animação usando TWEEN.js
+    const currentCameraPosition = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+
+    new TWEEN.Tween(currentCameraPosition)
+        .to(cameraPosition, 2000) // Transição em 2 segundos
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .onUpdate(() => {
+            camera.position.set(currentCameraPosition.x, currentCameraPosition.y, currentCameraPosition.z);
+        })
+        .start();
 }
 
 function animate() {
