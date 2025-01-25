@@ -191,7 +191,7 @@ function teleportToPlanet(planetName) {
     const planet = planets.find(p => p.name === planetName);
     if (planet) {
         // Ajuste da posição da câmera
-        const distanceFactor = 3; // Distância maior para o planeta
+        const distanceFactor = 1.1; // Distância maior para o planeta
         const newPosition = new THREE.Vector3(planet.mesh.position.x * distanceFactor, 0, planet.mesh.position.z * distanceFactor);
 
         // Teleportar a câmera para o planeta
@@ -207,7 +207,7 @@ function teleportToPlanet(planetName) {
         // Atualizar a cena após o teleporte
         setTimeout(() => {
             isTeleporting = false;
-        }, 1000); // Aguarda um tempo para evitar o teleporte simultâneo
+        }, 10000); // Aguarda um tempo para evitar o teleporte simultâneo
     }
 }
 
