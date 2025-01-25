@@ -426,3 +426,264 @@ function animate() {
 }
 
 init();
+
+
+
+
+//3
+
+
+
+let scene, camera, renderer, controls;
+let planets = [];
+let moonAngle = 0;
+let isTeleporting = false;
+
+const scale = 0.1;
+
+const planetData = {
+    mercury: { distance: 57.9, size: 0.4, texture: 'assets/textures/mercury.jpg', orbitTime: 88 },
+    venus: { distance: 108.2, size: 0.95, texture: 'assets/textures/venus.jpg', orbitTime: 225 },
+    earth: { distance: 149.6, size: 1, texture: 'assets/textures/earth.jpg', orbitTime: 365 },
+    mars: { distance: 227.9, size: 0.8, texture: 'assets/textures/mars.jpg', orbitTime: 687 },
+    jupiter: { distance: 778.3, size: 5, texture: 'assets/textures/jupiter.jpg', orbitTime: 4333 },
+    saturn: { distance: 1429, size: 4.5, texture: 'assets/textures/saturn.jpg', orbitTime: 10759 },
+    uranus: { distance: 2877, size: 3.5, texture: 'assets/textures/uranus.jpg', orbitTime: 30687 },
+    neptune: { distance: 4503, size: 3, texture: 'assets/textures/neptune.jpg', orbitTime: 60190 }
+};
+
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Adicionar o Skybox como fundo
+    createSkybox();
+
+    // Criar o Sol
+    const sunGeometry = new THREE.SphereGeometry(15, 32, 32);
+    const sunTexture = new THREE.TextureLoader().load('assets/textures/sun.jpg');
+    const sunMaterial = new THREE.MeshBasicMaterial({ map: sunTexture });
+    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+    scene.add(sun);
+
+    // Criar os planetas
+    for (let planetName in planetData) {
+        let planet = createPlanet(planetName, planetData[planetName]);
+        planets.push(planet);
+        scene.add(planet.mesh);
+    }
+
+    // Adicionar Lua orbitando a Terra
+    addMoon();
+
+    // Carregar posições salvas
+    loadPlanetPositions();
+
+    // Configurar câmera inicial
+    const earthData = planetData.earth;
+    camera.position.set(earthData.distance / 1.5, 0, 0);
+    camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0));
+
+    // Ajustar controles de órbita
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.enableZoom = true;
+    controls.minDistance = earthData.size * 0.1;
+    controls.maxDistance = 10000;
+    controls.zoomSpeed = 3;
+
+    // Adicionar luzes
+    const light = new THREE.AmbientLight(0x404040, 1);
+    scene.add(light);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(10, 10, 10).normalize();
+    scene.add(directionalLight);
+
+    // Iniciar animação
+    animate();
+}
+
+function createSkybox() {
+    const textureLoader = new THREE.TextureLoader();
+    const backgroundTexture = textureLoader.load('assets/textures/stars_milky_way.jpg');
+    const backgroundSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(10000, 64, 64),
+        new THREE.MeshBasicMaterial({ map: backgroundTexture, side: THREE.BackSide })
+    );
+    scene.add(backgroundSphere);
+}
+
+function createPlanet(name, data) {
+    const geometry = new THREE.SphereGeometry(data.size, 32, 32);
+    const texture = new THREE.TextureLoader().load(data.texture);
+    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const mesh = new THREE.Mesh(geometry, material);
+
+    const distance = data.distance / 2;
+    mesh.position.x = distance;
+
+    return {
+        name,
+        mesh,
+        orbitTime: data.orbitTime,
+        angle: 0,
+        distance: distance
+    };
+}
+
+function createSaturnRings(planet) {
+    // Geometria do anel (tamanho ajustável)
+    const ringGeometry = new THREE.RingGeometry(12, 18, 64); // Raio interno e externo
+    const ringMaterial = new THREE.MeshBasicMaterial({
+        color: 0xcccccc, // Cor do anel
+        side: THREE.DoubleSide, // Renderizar ambos os lados
+        transparent: true,
+        opacity: 0.8 // Para deixar um pouco translúcido
+    });
+
+    const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+
+    // Rotação para alinhar com o planeta
+    ringMesh.rotation.x = Math.PI / 2; // Deitar o anel no eixo X
+    ringMesh.position.set(planet.position.x, planet.position.y, planet.position.z);
+
+    return ringMesh;
+}
+
+// Criar Saturno e seus anéis
+function createSaturn() {
+    const saturnGeometry = new THREE.SphereGeometry(10, 32, 32);
+    const saturnMaterial = new THREE.MeshPhongMaterial({ color: 0xd3b58d });
+    const saturnMesh = new THREE.Mesh(saturnGeometry, saturnMaterial);
+
+    // Posição de Saturno no espaço
+    saturnMesh.position.set(150, 0, 160);
+
+    // Criar e adicionar os anéis de Saturno
+    const saturnRings = createSaturnRings(saturnMesh);
+    scene.add(saturnMesh);
+    scene.add(saturnRings);
+}
+
+function addMoon() {
+    const earthData = planetData.earth;
+    const earthDistance = earthData.distance / 2;
+
+    const moonGeometry = new THREE.SphereGeometry(0.27, 32, 32);
+    const moonTexture = new THREE.TextureLoader().load('assets/textures/moon.jpg');
+    const moonMaterial = new THREE.MeshBasicMaterial({ map: moonTexture });
+    const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+
+    moon.position.set(earthDistance + 2, 0, 0);
+    scene.add(moon);
+
+    planets.push({
+        name: 'moon',
+        mesh: moon,
+        orbitTime: 27,
+        angle: 0,
+        distance: 2
+    });
+}
+
+function savePlanetPositions() {
+    const positions = planets.map(planet => ({
+        name: planet.name,
+        position: {
+            x: planet.mesh.position.x,
+            y: planet.mesh.position.y,
+            z: planet.mesh.position.z
+        },
+        angle: planet.angle
+    }));
+    localStorage.setItem('planetPositions', JSON.stringify(positions));
+}
+
+function loadPlanetPositions() {
+    const savedPositions = JSON.parse(localStorage.getItem('planetPositions'));
+    if (savedPositions) {
+        savedPositions.forEach(savedPlanet => {
+            const planet = planets.find(p => p.name === savedPlanet.name);
+            if (planet && savedPlanet.position) {
+                const { x, y, z } = savedPlanet.position;
+                planet.mesh.position.set(x, y, z);
+                planet.angle = savedPlanet.angle || 0;
+            }
+        });
+    }
+}
+
+function teleportToPlanet(planetId) {
+    const planet = document.getElementById(planetId);
+
+    if (!planet) {
+        console.error(`Planeta ${planetId} não encontrado!`);
+        return;
+    }
+
+    // Posição do planeta no espaço 3D (exemplo fictício)
+    const planetPosition = {
+        mercury: { x: 10, y: 0, z: 20 },
+        venus: { x: 30, y: 0, z: 40 },
+        earth: { x: 50, y: 0, z: 60 },
+        mars: { x: 70, y: 0, z: 80 },
+        jupiter: { x: 100, y: 0, z: 120 },
+        saturn: { x: 150, y: 0, z: 160 },
+        uranus: { x: 200, y: 0, z: 220 },
+        neptune: { x: 250, y: 0, z: 260 }
+    }[planetId];
+
+    if (!planetPosition) {
+        console.error(`Posição do planeta ${planetId} não definida!`);
+        return;
+    }
+
+    // Configuração da câmera
+    const cameraPosition = {
+        x: planetPosition.x,
+        y: planetPosition.y + 10, // Um pouco acima do plano do planeta
+        z: planetPosition.z - 30 // Mais próximo do planeta
+    };
+
+    // Animação usando TWEEN.js
+    const currentCameraPosition = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+
+    new TWEEN.Tween(currentCameraPosition)
+        .to(cameraPosition, 2000) // Transição em 2 segundos
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .onUpdate(() => {
+            camera.position.set(currentCameraPosition.x, currentCameraPosition.y, currentCameraPosition.z);
+        })
+        .start();
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    if (!isTeleporting) {
+        planets.forEach(planet => {
+            if (planet.name !== 'moon') {
+                planet.angle += (2 * Math.PI) / (planet.orbitTime * 100);
+                planet.mesh.position.x = planet.distance * Math.cos(planet.angle);
+                planet.mesh.position.z = planet.distance * Math.sin(planet.angle);
+            } else {
+                const earth = planets.find(p => p.name === 'earth');
+                if (earth) {
+                    moonAngle += (2 * Math.PI) / (planet.orbitTime * 100);
+                    planet.mesh.position.x = earth.mesh.position.x + planet.distance * Math.cos(moonAngle);
+                    planet.mesh.position.z = earth.mesh.position.z + planet.distance * Math.sin(moonAngle);
+                }
+            }
+        });
+    }
+
+    savePlanetPositions(); // Salvar posições em cada frame
+    renderer.render(scene, camera);
+}
+
+init();
