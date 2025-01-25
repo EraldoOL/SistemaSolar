@@ -18,7 +18,7 @@ const planetData = {
 
 function init() {
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
@@ -27,7 +27,7 @@ function init() {
     createSkybox();
 
     // Criar o Sol
-    const sunGeometry = new THREE.SphereGeometry(15, 32, 32);
+    const sunGeometry = new THREE.SphereGeometry(50, 64, 64);
     const sunTexture = new THREE.TextureLoader().load('assets/textures/sun.jpg');
     const sunMaterial = new THREE.MeshBasicMaterial({ map: sunTexture });
     const sun = new THREE.Mesh(sunGeometry, sunMaterial);
