@@ -235,4 +235,15 @@ function animate() {
     renderer.render(scene, camera);
 }
 
+
+function resizeCanvas() {
+    renderer.setSize(window.innerWidth, window.innerHeight); // Atualiza o tamanho do renderer
+    camera.aspect = window.innerWidth / window.innerHeight; // Atualiza o aspecto da câmera
+    camera.updateProjectionMatrix(); // Recalcula a matriz de projeção
+}
+
+// Adicione um evento para redimensionar o canvas quando a tela mudar de tamanho
+window.addEventListener('resize', resizeCanvas);
+
+
 init();
