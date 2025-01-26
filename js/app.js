@@ -6,14 +6,14 @@ let isTeleporting = false;
 const scale = 0.1;
 
 const planetData = {
-    mercury: { distance: 300, size: 0.4, texture: 'assets/textures/mercury.jpg', orbitTime: 88 },
-    venus: { distance: 650, size: 0.95, texture: 'assets/textures/venus.jpg', orbitTime: 225 },
-    earth: { distance: 870, size: 1, texture: 'assets/textures/earth.jpg', orbitTime: 365 },
-    mars: { distance: 1300, size: 0.8, texture: 'assets/textures/mars.jpg', orbitTime: 687 },
-    jupiter: { distance: 1840, size: 5, texture: 'assets/textures/jupiter.jpg', orbitTime: 4333 },
-    saturn: { distance: 2500, size: 4.5, texture: 'assets/textures/saturn.jpg', orbitTime: 10759 },
-    uranus: { distance: 3277, size: 3.5, texture: 'assets/textures/uranus.jpg', orbitTime: 30687 },
-    neptune: { distance: 4703, size: 3, texture: 'assets/textures/neptune.jpg', orbitTime: 60190 }
+    mercury: { distance: 57.9, size: 0.4, texture: 'assets/textures/mercury.jpg', orbitTime: 88 },
+    venus: { distance: 108.2, size: 0.95, texture: 'assets/textures/venus.jpg', orbitTime: 225 },
+    earth: { distance: 149.6, size: 1, texture: 'assets/textures/earth.jpg', orbitTime: 365 },
+    mars: { distance: 227.9, size: 0.8, texture: 'assets/textures/mars.jpg', orbitTime: 687 },
+    jupiter: { distance: 778.3, size: 5, texture: 'assets/textures/jupiter.jpg', orbitTime: 4333 },
+    saturn: { distance: 1429, size: 4.5, texture: 'assets/textures/saturn.jpg', orbitTime: 10759 },
+    uranus: { distance: 2877, size: 3.5, texture: 'assets/textures/uranus.jpg', orbitTime: 30687 },
+    neptune: { distance: 4503, size: 3, texture: 'assets/textures/neptune.jpg', orbitTime: 60190 }
 };
 
 function init() {
@@ -27,7 +27,7 @@ function init() {
     createSkybox();
 
     // Criar o Sol
-    const sunGeometry = new THREE.SphereGeometry(50, 64, 64);
+    const sunGeometry = new THREE.SphereGeometry(15, 32, 32);
     const sunTexture = new THREE.TextureLoader().load('assets/textures/sun.jpg');
     const sunMaterial = new THREE.MeshBasicMaterial({ map: sunTexture });
     const sun = new THREE.Mesh(sunGeometry, sunMaterial);
