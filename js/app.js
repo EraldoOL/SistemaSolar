@@ -237,7 +237,6 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-
 function resizeCanvas() {
     renderer.setSize(window.innerWidth, window.innerHeight); // Atualiza o tamanho do renderer
     camera.aspect = window.innerWidth / window.innerHeight; // Atualiza o aspecto da câmera
