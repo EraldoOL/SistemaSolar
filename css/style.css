@@ -6,9 +6,12 @@ body {
 
 canvas {
   display: block;
-  width: 0%;
-  height: 100%;
+  width: 100vw; /* Largura total da viewport */
+  height: 100vh; /* Altura total da viewport */
+  margin: 0;
+  padding: 0;
 }
+
 
 
 #planet-panel {
