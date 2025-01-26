@@ -240,7 +240,7 @@ function animate() {
     if (!isTeleporting) {
         planets.forEach(planet => {
             if (planet.name !== 'moon') {
-                planet.angle += (2 * Math.PI) / (planet.orbitTime * 100);
+                planet.angle += (2 * Math.PI) / (planet.orbitTime * 1);
                 planet.mesh.position.x = planet.distance * Math.cos(planet.angle);
                 planet.mesh.position.z = planet.distance * Math.sin(planet.angle);
             } else {
