@@ -107,7 +107,7 @@ function createSaturnRings() {
         map: new THREE.TextureLoader().load('assets/textures/saturn_ring_alpha.png'), // Carregando a textura correta
         side: THREE.DoubleSide, // Tornando ambos os lados visíveis
         transparent: true, // Garantindo que a transparência da textura seja aplicada
-        alphaTest: 0.5, // Definindo o limiar de transparência
+        alphaTest: 1, // Definindo o limiar de transparência
     });
     
     const saturnRings = new THREE.Mesh(saturnRingGeometry, saturnRingMaterial);
@@ -207,7 +207,7 @@ function teleportToPlanet(planetName) {
         // Atualizar a cena após o teleporte
         setTimeout(() => {
             isTeleporting = false;
-        }, 10000); // Aguarda um tempo para evitar o teleporte simultâneo
+        }, 1); // Aguarda um tempo para evitar o teleporte simultâneo
     }
 }
 
