@@ -1,13 +1,15 @@
 body {
   margin: 0;
+  padding: 0;
   overflow: hidden;
-  
+  width: 0vw;
+  height: 0vh;
 }
 
 canvas {
   display: block;
-  width: 100vw; /* Largura total da viewport */
-  height: 100vh; /* Altura total da viewport */
+  width: 0vw; /* Largura total da viewport */
+  height: 0vh; /* Altura total da viewport */
   margin: 0;
   padding: 0;
 }
