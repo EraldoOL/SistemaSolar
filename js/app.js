@@ -18,7 +18,7 @@ const planetData = {
 
 function init() {
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
@@ -76,9 +76,11 @@ function createSkybox() {
     const textureLoader = new THREE.TextureLoader();
     const backgroundTexture = textureLoader.load('assets/textures/stars_milky_way.jpg');
     const backgroundSphere = new THREE.Mesh(
-        new THREE.SphereGeometry(10000, 64, 64),
+        new THREE.SphereGeometry(10000, 0, 0),
         new THREE.MeshBasicMaterial({ map: backgroundTexture, side: THREE.BackSide })
     );
+    
+    
     scene.add(backgroundSphere);
 }
 
