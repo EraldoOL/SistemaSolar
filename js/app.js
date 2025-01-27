@@ -23,10 +23,9 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Adicionar o Skybox como fundo
     createSkybox();
 
-    // Criar o Sol
+    
     const sunGeometry = new THREE.SphereGeometry(15, 32, 32);
     const sunTexture = new THREE.TextureLoader().load('assets/textures/sun.jpg');
     const sunMaterial = new THREE.MeshBasicMaterial({ map: sunTexture });
@@ -37,7 +36,7 @@ for (let planetName in planetData) {
     let planet;
 
     if (planetName === 'saturn') {
-        planet = createSaturn(); // Usar a função especial para Saturno
+        planet = createSaturn(); 
     } else {
         planet = createPlanet(planetName, planetData[planetName]);
     }
@@ -46,18 +45,18 @@ for (let planetName in planetData) {
     scene.add(planet.mesh);
 }
 
-    // Adicionar Lua orbitando a Terra
+
     addMoon();
 
-    // Carregar posições salvas
+
     loadPlanetPositions();
 
-    // Configurar câmera inicial
+
     const earthData = planetData.earth;
     camera.position.set(earthData.distance / 1.9, 0, 0);
     camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0));
 
-    // Ajustar controles de órbita
+
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
@@ -66,7 +65,7 @@ for (let planetName in planetData) {
     controls.maxDistance = 10000;
     controls.zoomSpeed = 3;
 
-    // Adicionar luzes
+
     const light = new THREE.AmbientLight(0x404040, 1);
     scene.add(light);
 
@@ -74,7 +73,7 @@ for (let planetName in planetData) {
     directionalLight.position.set(10, 10, 10).normalize();
     scene.add(directionalLight);
 
-    // Iniciar animação
+
     animate();
 }
 
@@ -108,7 +107,6 @@ function createPlanet(name, data) {
     };
 }
 
-// Função para carregar a textura do anel e garantir que ela está sendo carregada
 function loadRingTexture() {
     const texture = new THREE.TextureLoader().load('assets/textures/saturn.jpg', function (texture) {
         console.log('Textura carregada com sucesso!');
@@ -119,44 +117,44 @@ function loadRingTexture() {
 }
 
 function createSaturn() {
-    const saturnGroup = new THREE.Group(); // Grupo para Saturno e seus anéis
-
-    // Criar o planeta Saturno
+    const saturnGroup = new THREE.Group(); 
+    
     const saturnGeometry = new THREE.SphereGeometry(4.5, 32, 32);
     const saturnTexture = new THREE.TextureLoader().load('assets/textures/saturn.jpg');
     const saturnMaterial = new THREE.MeshBasicMaterial({ map: saturnTexture });
     const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
 
-    // Adicionar o planeta ao grupo
+
     saturnGroup.add(saturn);
 
-    // Criar os anéis de Saturno
-    const ringGeometry = new THREE.RingGeometry(6, 10, 64); // Raio interno, externo e segmentos
+
+    const ringGeometry = new THREE.RingGeometry(6, 10, 64); 
+    
     const ringTexture = new THREE.TextureLoader().load('assets/textures/saturn_ring_alpha.png');
     const ringMaterial = new THREE.MeshBasicMaterial({
         map: ringTexture,
-        side: THREE.DoubleSide, // Ambos os lados visíveis
-        transparent: true,     // Transparência para o fundo
+        side: THREE.DoubleSide, 
+        transparent: true,     
     });
     const ring = new THREE.Mesh(ringGeometry, ringMaterial);
 
-    // Rotacionar e posicionar os anéis
-    ring.rotation.x = Math.PI / 2; // Horizontal
+
+    ring.rotation.x = Math.PI / 2; 
     ring.position.set(0, 0, 0);
 
-    // Adicionar os anéis ao grupo
+
     saturnGroup.add(ring);
 
-    // Posicionar o grupo no sistema solar
+
     const saturnData = planetData.saturn;
     saturnGroup.position.set(saturnData.distance / 2, 0, 0);
 
-    // Adicionar o grupo à cena
+
     scene.add(saturnGroup);
 
     return {
         name: 'saturn',
-        mesh: saturnGroup, // O grupo inclui o planeta e os anéis
+        mesh: saturnGroup, 
         orbitTime: saturnData.orbitTime,
         angle: 0,
         distance: saturnData.distance / 2,
@@ -218,24 +216,23 @@ function teleportToPlanet(planetName) {
     isTeleporting = true;
     const planet = planets.find(p => p.name === planetName);
     if (planet) {
-        // Ajuste da posição da câmera
-        const distanceFactor = 1.1; // Distância maior para o planeta
-        const newPosition = new THREE.Vector3(planet.mesh.position.x * distanceFactor, 0, planet.mesh.position.z * distanceFactor);
 
-        // Teleportar a câmera para o planeta
+        const distanceFactor = 1.1; 
+        const newPosition = new THREE.Vector3(planet.mesh.position.x * distanceFactor, 0, planet.mesh.position.z * distanceFactor);
+       
         camera.position.copy(newPosition);
 
-        // Olhar para o Sol
-        camera.lookAt(new THREE.Vector3(0, 0, 0)); // O Sol está na posição (0,0,0)
+       
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-        // Atualizar os controles de órbita
-        controls.target.set(0, 0, 0);  // Focar no Sol
+        
+        controls.target.set(0, 0, 0); 
         controls.update();
 
-        // Atualizar a cena após o teleporte
+        
         setTimeout(() => {
             isTeleporting = false;
-        }, 1); // Aguarda um tempo para evitar o teleporte simultâneo
+        }, 1); 
     }
 }
 
@@ -259,17 +256,18 @@ function animate() {
         });
     }
 
-    savePlanetPositions(); // Salvar posições em cada frame
+    savePlanetPositions(); 
     renderer.render(scene, camera);
 }
 
 function resizeCanvas() {
-    renderer.setSize(window.innerWidth, window.innerHeight); // Atualiza o tamanho do renderer
-    camera.aspect = window.innerWidth / window.innerHeight; // Atualiza o aspecto da câmera
-    camera.updateProjectionMatrix(); // Recalcula a matriz de projeção
+    renderer.setSize(window.innerWidth, window.innerHeight); 
+    camera.aspect = window.innerWidth  
+    window.innerHeight; 
+    camera.updateProjectionMatrix(); 
 }
 
-// Adicione um evento para redimensionar o canvas quando a tela mudar de tamanho
+
 window.addEventListener('resize', resizeCanvas);
 
 
