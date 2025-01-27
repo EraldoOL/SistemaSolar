@@ -33,12 +33,18 @@ function init() {
     const sun = new THREE.Mesh(sunGeometry, sunMaterial);
     scene.add(sun);
 
-    // Criar os planetas
-    for (let planetName in planetData) {
-        let planet = createPlanet(planetName, planetData[planetName]);
-        planets.push(planet);
-        scene.add(planet.mesh);
+for (let planetName in planetData) {
+    let planet;
+
+    if (planetName === 'saturn') {
+        planet = createSaturn(); // Usar a função especial para Saturno
+    } else {
+        planet = createPlanet(planetName, planetData[planetName]);
     }
+
+    planets.push(planet);
+    scene.add(planet.mesh);
+}
 
     // Adicionar Lua orbitando a Terra
     addMoon();
@@ -112,53 +118,52 @@ function loadRingTexture() {
     return texture;
 }
 
-// Função para criar os anéis de Saturno
-function createSaturnRings() {
-    // Carregando a textura
-    const ringTexture = loadRingTexture();
-    
-    // Se a textura não carregar corretamente, a função não deve prosseguir
-    if (!ringTexture) {
-        console.error("A textura do anel não foi carregada corretamente.");
-        return;
-    }
-
-    const saturnRingGeometry = new THREE.RingGeometry(6, 10, 100); // Raio interno 6, raio externo 10, e 100 segmentos
-    const saturnRingMaterial = new THREE.MeshBasicMaterial({
-        map: ringTexture, // Usando a textura carregada
-        side: THREE.DoubleSide, // Tornando ambos os lados visíveis
-        transparent: true, // Tornando a textura transparente
-        alphaTest: 0.1, // Definindo o teste de transparência
-    });
-    
-    const saturnRings = new THREE.Mesh(saturnRingGeometry, saturnRingMaterial);
-    saturnRings.rotation.x = Math.PI / 2; // Coloca o anel na posição correta (horizontal)
-    
-    // Garantir que o anel de Saturno está posicionado no centro de Saturno
-    saturnRings.position.set(0, 0, 0); // Ajuste a posição do anel
-    
-    return saturnRings; // Retorna o objeto para ser adicionado à cena
-}
-
-// Função para criar o planeta Saturno com anéis
 function createSaturn() {
-    const saturnGeometry = new THREE.SphereGeometry(4.5, 32, 32); // Criando a esfera de Saturno
-    const saturnTexture = new THREE.TextureLoader().load('assets/textures/saturn.jpg'); // Textura de Saturno
+    const saturnGroup = new THREE.Group(); // Grupo para Saturno e seus anéis
+
+    // Criar o planeta Saturno
+    const saturnGeometry = new THREE.SphereGeometry(4.5, 32, 32);
+    const saturnTexture = new THREE.TextureLoader().load('assets/textures/saturn.jpg');
     const saturnMaterial = new THREE.MeshBasicMaterial({ map: saturnTexture });
     const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
-    
-    // Criar os anéis de Saturno
-    const saturnRings = createSaturnRings();
-    
-    if (saturnRings) {
-        // Posicionar Saturno e seus anéis
-        saturn.position.set(1429, 0, 0); // Ajuste a distância de Saturno conforme necessário
-        scene.add(saturn); // Adiciona Saturno à cena
-        scene.add(saturnRings); // Adiciona os anéis de Saturno à cena
-    }
 
-    return saturn;
+    // Adicionar o planeta ao grupo
+    saturnGroup.add(saturn);
+
+    // Criar os anéis de Saturno
+    const ringGeometry = new THREE.RingGeometry(6, 10, 64); // Raio interno, externo e segmentos
+    const ringTexture = new THREE.TextureLoader().load('assets/textures/saturn_ring_alpha.png');
+    const ringMaterial = new THREE.MeshBasicMaterial({
+        map: ringTexture,
+        side: THREE.DoubleSide, // Ambos os lados visíveis
+        transparent: true,     // Transparência para o fundo
+    });
+    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+
+    // Rotacionar e posicionar os anéis
+    ring.rotation.x = Math.PI / 2; // Horizontal
+    ring.position.set(0, 0, 0);
+
+    // Adicionar os anéis ao grupo
+    saturnGroup.add(ring);
+
+    // Posicionar o grupo no sistema solar
+    const saturnData = planetData.saturn;
+    saturnGroup.position.set(saturnData.distance / 2, 0, 0);
+
+    // Adicionar o grupo à cena
+    scene.add(saturnGroup);
+
+    return {
+        name: 'saturn',
+        mesh: saturnGroup, // O grupo inclui o planeta e os anéis
+        orbitTime: saturnData.orbitTime,
+        angle: 0,
+        distance: saturnData.distance / 2,
+    };
 }
+
+
 function addMoon() {
     const earthData = planetData.earth;
     const earthDistance = earthData.distance / 2;
