@@ -1,4 +1,4 @@
-let scene, camera, renderer, controls;
+/*let scene, camera, renderer, controls;
 let planets = []; // Lista de planetas
 let moonAngle = 0;
 let isTeleporting = false; // Variável para controlar o teleporte
@@ -1515,5 +1515,5 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 
 
-init();
+init();*/
 
