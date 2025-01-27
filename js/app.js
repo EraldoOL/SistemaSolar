@@ -262,11 +262,9 @@ function animate() {
 
 function resizeCanvas() {
     renderer.setSize(window.innerWidth, window.innerHeight); 
-    camera.aspect = window.innerWidth  
-    window.innerHeight; 
+    camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix(); 
 }
-
 
 window.addEventListener('resize', resizeCanvas);
 
