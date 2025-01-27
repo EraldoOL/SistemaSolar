@@ -8,8 +8,8 @@ body {
 
 canvas {
   display: block;
-  width: 0vw; /* Largura total da viewport */
-  height: 0vh; /* Altura total da viewport */
+  width: 0vw; 
+  height: 0vh; 
   margin: 0;
   padding: 0;
 }
