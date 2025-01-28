@@ -221,7 +221,6 @@ function teleportToPlanet(planetName) {
         const newPosition = new THREE.Vector3(planet.mesh.position.x * distanceFactor, 0, planet.mesh.position.z * distanceFactor);
        
         camera.position.copy(newPosition);
-
        
         camera.lookAt(new THREE.Vector3(0, 0, 0));
         
