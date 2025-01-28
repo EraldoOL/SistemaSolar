@@ -212,7 +212,6 @@ function loadPlanetPositions() {
 
 function teleportToPlanet(planetName) {
     if (isTeleporting) return;
-
     isTeleporting = true;
     const planet = planets.find(p => p.name === planetName);
     if (planet) {
