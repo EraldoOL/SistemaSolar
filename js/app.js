@@ -161,7 +161,6 @@ function createSaturn() {
     };
 }
 
-
 function addMoon() {
     const earthData = planetData.earth;
     const earthDistance = earthData.distance / 2;
