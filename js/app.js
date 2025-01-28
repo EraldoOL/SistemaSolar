@@ -151,7 +151,6 @@ function createSaturn() {
 
 
     scene.add(saturnGroup);
-
     return {
         name: 'saturn',
         mesh: saturnGroup, 
