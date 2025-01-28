@@ -170,7 +170,6 @@ function addMoon() {
     const moonTexture = new THREE.TextureLoader().load('assets/textures/moon.jpg');
     const moonMaterial = new THREE.MeshBasicMaterial({ map: moonTexture });
     const moon = new THREE.Mesh(moonGeometry, moonMaterial);
-
     moon.position.set(earthDistance + 2, 0, 0);
     scene.add(moon);
     planets.push({
