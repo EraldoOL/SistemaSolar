@@ -228,7 +228,6 @@ function teleportToPlanet(planetName) {
         
         controls.target.set(0, 0, 0); 
         controls.update();
-
         
         setTimeout(() => {
             isTeleporting = false;
