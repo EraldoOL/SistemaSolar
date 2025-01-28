@@ -165,7 +165,6 @@ function createSaturn() {
 function addMoon() {
     const earthData = planetData.earth;
     const earthDistance = earthData.distance / 2;
-
     const moonGeometry = new THREE.SphereGeometry(0.27, 32, 32);
     const moonTexture = new THREE.TextureLoader().load('assets/textures/moon.jpg');
     const moonMaterial = new THREE.MeshBasicMaterial({ map: moonTexture });
