@@ -173,7 +173,6 @@ function addMoon() {
 
     moon.position.set(earthDistance + 2, 0, 0);
     scene.add(moon);
-
     planets.push({
         name: 'moon',
         mesh: moon,
