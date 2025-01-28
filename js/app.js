@@ -216,7 +216,6 @@ function teleportToPlanet(planetName) {
     isTeleporting = true;
     const planet = planets.find(p => p.name === planetName);
     if (planet) {
-
         const distanceFactor = 1.1; 
         const newPosition = new THREE.Vector3(planet.mesh.position.x * distanceFactor, 0, planet.mesh.position.z * distanceFactor);
        
