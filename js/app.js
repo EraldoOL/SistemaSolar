@@ -268,5 +268,4 @@ function resizeCanvas() {
 
 window.addEventListener('resize', resizeCanvas);
 
-
 init();
