@@ -138,7 +138,6 @@ function createSaturn() {
     });
     const ring = new THREE.Mesh(ringGeometry, ringMaterial);
 
-
     ring.rotation.x = Math.PI / 2; 
     ring.position.set(0, 0, 0);
     saturnGroup.add(ring);
