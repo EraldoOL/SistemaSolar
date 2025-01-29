@@ -145,7 +145,6 @@ function createSaturn() {
 
     saturnGroup.add(ring);
 
-
     const saturnData = planetData.saturn;
     saturnGroup.position.set(saturnData.distance / 2, 0, 0);
     scene.add(saturnGroup);
