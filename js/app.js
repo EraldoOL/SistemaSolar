@@ -127,7 +127,6 @@ function createSaturn() {
 
     saturnGroup.add(saturn);
 
-
     const ringGeometry = new THREE.RingGeometry(6, 10, 64); 
     
     const ringTexture = new THREE.TextureLoader().load('assets/textures/saturn_ring_alpha.png');
