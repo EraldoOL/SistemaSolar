@@ -148,7 +148,6 @@ function createSaturn() {
 
     const saturnData = planetData.saturn;
     saturnGroup.position.set(saturnData.distance / 2, 0, 0);
-
     scene.add(saturnGroup);
     return {
         name: 'saturn',
