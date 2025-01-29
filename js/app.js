@@ -124,7 +124,6 @@ function createSaturn() {
     const saturnMaterial = new THREE.MeshBasicMaterial({ map: saturnTexture });
     const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
 
-
     saturnGroup.add(saturn);
 
     const ringGeometry = new THREE.RingGeometry(6, 10, 64); 
