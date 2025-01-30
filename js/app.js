@@ -64,8 +64,7 @@ for (let planetName in planetData) {
     controls.minDistance = earthData.size * 0.1;
     controls.maxDistance = 10000;
     controls.zoomSpeed = 3;
-
-
+    
     const light = new THREE.AmbientLight(0x404040, 1);
     scene.add(light);
 
