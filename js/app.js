@@ -85,7 +85,6 @@ function createSkybox() {
         new THREE.MeshBasicMaterial({ map: backgroundTexture, side: THREE.BackSide })
     );
     
-    
     scene.add(backgroundSphere);
 }
 
