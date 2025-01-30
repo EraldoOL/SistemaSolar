@@ -51,7 +51,6 @@ for (let planetName in planetData) {
 
     loadPlanetPositions();
 
-
     const earthData = planetData.earth;
     camera.position.set(earthData.distance / 1.9, 0, 0);
     camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0));
