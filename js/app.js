@@ -73,7 +73,6 @@ for (let planetName in planetData) {
     directionalLight.position.set(10, 10, 10).normalize();
     scene.add(directionalLight);
 
-
     animate();
 }
 
