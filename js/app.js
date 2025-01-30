@@ -40,7 +40,6 @@ for (let planetName in planetData) {
     } else {
         planet = createPlanet(planetName, planetData[planetName]);
     }
-
     planets.push(planet);
     scene.add(planet.mesh);
 }
