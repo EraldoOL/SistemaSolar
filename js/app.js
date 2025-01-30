@@ -56,7 +56,6 @@ for (let planetName in planetData) {
     camera.position.set(earthData.distance / 1.9, 0, 0);
     camera.lookAt(new THREE.Vector3(earthData.distance / 2, 0, 0));
 
-
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
