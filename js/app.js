@@ -25,7 +25,6 @@ function init() {
 
     createSkybox();
 
-    
     const sunGeometry = new THREE.SphereGeometry(15, 32, 32);
     const sunTexture = new THREE.TextureLoader().load('assets/textures/sun.jpg');
     const sunMaterial = new THREE.MeshBasicMaterial({ map: sunTexture });
