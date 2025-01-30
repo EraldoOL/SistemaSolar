@@ -226,7 +226,6 @@ function animate() {
             }
         });
     }
-
     savePlanetPositions(); 
     renderer.render(scene, camera);
 }
