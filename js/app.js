@@ -48,7 +48,6 @@ for (let planetName in planetData) {
 
     addMoon();
 
-
     loadPlanetPositions();
 
     const earthData = planetData.earth;
