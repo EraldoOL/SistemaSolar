@@ -45,7 +45,6 @@ for (let planetName in planetData) {
     scene.add(planet.mesh);
 }
 
-
     addMoon();
 
     loadPlanetPositions();
