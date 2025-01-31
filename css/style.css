@@ -37,7 +37,6 @@ canvas {
     cursor: pointer;
     transition: 0.3s;
 }
-
 #planet-panel li:hover {
     color: #ff0;
 }
